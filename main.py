@@ -12,6 +12,26 @@ mp_holistic = mp.solutions.holistic
 # MediaPipe drawing utilities
 mp_drawing = mp.solutions.drawing_utils
 
+# Path for exported data, numpy arrays
+DATA_PATH = os.path.join("MP_Data")
+
+# Signs to detect
+actions = np.array(["hello"])
+
+# Number of videos
+videos = 30
+
+# Videos are 30 frames in length
+video_length = 30
+
+# Create directories for data collection
+for i in actions:
+    for j in range(videos):
+        try:
+            os.makedirs(os.path.join(DATA_PATH, i, str(j)))
+        except:
+            pass
+
 
 def mp_detection(image, model):
     # Color conversion - BGR to RGB
@@ -42,37 +62,6 @@ def mp_draw_landmarks(image, results):
     mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS)
 
 
-# Access webcam
-capture = cv2.VideoCapture(0)
-
-# Set MediaPipe model
-with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-    # While the webcam is open
-    while capture.isOpened():
-
-        # Read the webcam feed
-        ret, frame = capture.read()
-
-        # Make detections
-        image, results = mp_detection(frame, holistic)
-
-        # Draw landmarks
-        mp_draw_landmarks(image, results)
-
-        # Show the webcam feed to the window
-        cv2.imshow("OpenCV Video Feed", image)
-
-        # Break the loop when q is pressed
-        if cv2.waitKey(10) & 0xFF == ord("q"):
-            break
-
-    # Stop the webcam feed
-    capture.release()
-
-    # Close the webcam window
-    cv2.destroyAllWindows()
-
-
 def extract_keypoints(results):
     # If there is data collected for the face, hands, and pose; extract the keypoint values
     if results.face_landmarks:
@@ -97,14 +86,67 @@ def extract_keypoints(results):
 
     return np.concatenate([face, rh, lh, pose])
 
-# Path for exported data, numpy arrays
-DATA_PATH = os.path.join("MP_Data")
 
-# Signs to detect
-actions = np.array(["hello", "thanks", "iloveyou"])
+# Access webcam
+capture = cv2.VideoCapture(0)
 
-#
-no_sequences = 30
+# Set MediaPipe model
+with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+    breaker = False
 
-# Videos are 30 frames in length
-sequence_length = 30
+    # While the webcam is open
+    while capture.isOpened():
+
+        # Loop through each action
+        for action in actions:
+            # Loop through each video of action
+            for video in range(videos):
+                # Loop through each frame of video
+                for video_frame in range(video_length):
+
+                    # Read the webcam feed
+                    ret, frame = capture.read()
+
+                    # Make detections
+                    image, results = mp_detection(frame, holistic)
+
+                    # Draw landmarks
+                    mp_draw_landmarks(image, results)
+
+                    # Collect each frame
+                    if video_frame == 0:
+                        # Informative text on screen
+                        cv2.putText(image, "Starting Collection", (120, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0),
+                                    4, cv2.LINE_AA)
+                        cv2.putText(image, "Data for '{}', video no. {}".format(action, video + 1), (20, 20),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 1, cv2.LINE_AA)
+
+                        # Break between each video
+                        cv2.waitKey(1500)
+                    else:
+                        cv2.putText(image, "Data for '{}', video no. {}".format(action, video + 1), (20, 20),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 1, cv2.LINE_AA)
+
+                    # Export keypoint data to its designated directory
+                    keypoints = extract_keypoints(results)
+                    npy_path = os.path.join(DATA_PATH, action, str(video), str(video_frame))
+                    np.save(npy_path, keypoints)
+
+                    # Show the webcam feed to the window
+                    cv2.imshow("OpenCV Video Feed", image)
+
+                    # Break the loop when q is pressed
+                    if cv2.waitKey(10) & 0xFF == ord("q"):
+                        breaker = True
+                        break
+                if breaker:
+                    break
+            if breaker:
+                break
+        if breaker:
+            break
+
+    # Stop the webcam feed
+    capture.release()
+    # Close the webcam window
+    cv2.destroyAllWindows()
