@@ -28,10 +28,6 @@ SignApp is for the deaf and hard of hearing and anyone who wishes to communicate
 
 As with any successful service, this interpreter would bring a lot of traffic to the organization’s website and applications. Additionally, the app would eliminate the need for interpreters in a given place, making it much more accessible to people who use sign language. The service could also be monetized by introducing business licenses, profiting from institutions who want professional ASL interpretation while still keeping the model accessible to the public. Overall, overcoming the language barrier between the deaf and others would make everyone’s lives much more convenient.
 
-# Current Status
-
-We have identified our primary databases that we will use to train our model and have started the data labeling process. We are simultaneously working on a Python-based solution that could access the camera, show the feed on a website and process the video. We have a Google Collab file and GitHub repository set up where we collaboratively work on our code. We have most of our design ideas and layouts ready. We need to complete our data labeling, train our model and deploy it. 
-
 # Technologies Used
 
 We primarily rely on the Python frameworks TenserFlow and OpenCV in order to train an object detection model and keep it working real-time. We are also utilizing the Keras deep learning API’s Long Short-Term Memory layer to recognize the facial expressions and hand gestures that constitute each sign word. We use Microsoft’s VoTT labeling tool to label our data and use self-made Python programs to modify the text files containing our data to our needs. Our development is conducted through Google Colab, which is a hosted Jupyter Notebook service where we write and execute arbitrary Python code on the Cloud, making it especially well suited to machine learning and data analysis, also allowing us to work on the project simultaneously. In later stages of development, we are planning on using Flask, a Python module that lets you develop web applications, in order to publish our application on the web. We will use HTML and JavaScript to fine-tune our web app later on. 
