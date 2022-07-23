@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 import mediapipe as mp
 from matplotlib import pyplot as plt
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.utils import to_categorical
 
 # MediaPipe holistic model
 mp_holistic = mp.solutions.holistic
